@@ -1,12 +1,17 @@
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShieldAlert, CheckCircle2, AlertTriangle, ArrowLeft, Download, Share2, Info } from 'lucide-react';
+import { ShieldAlert, CheckCircle2, AlertTriangle, ArrowLeft, Download, Share2, Info, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useRef, useState } from 'react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const ResultsPage = () => {
     const { currentUser } = useAuth();
     const location = useLocation();
     const assessmentData = location.state || {};
+    const reportRef = useRef(null);
+    const [isGenerating, setIsGenerating] = useState(false);
 
     // Determine risk level based on score
     const getRiskLevel = (score) => {
@@ -58,6 +63,36 @@ const ResultsPage = () => {
 
     const ringColor = result.riskLevel === "Low" ? "stroke-health-green" : result.riskLevel === "Moderate" ? "stroke-amber-500" : "stroke-rose-500";
 
+    const handleDownloadPDF = async () => {
+        if (!reportRef.current) return;
+
+        setIsGenerating(true);
+        try {
+            const element = reportRef.current;
+            const canvas = await html2canvas(element, {
+                scale: 2, // Higher quality
+                useCORS: true,
+                logging: false,
+                backgroundColor: "#f8fafc" // Match slate-50
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'px',
+                format: [canvas.width / 2, canvas.height / 2]
+            });
+
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width / 2, canvas.height / 2);
+            pdf.save(`VitaGuard_Report_${result.userName.replace(/\s+/g, '_')}_${new Date().getTime()}.pdf`);
+        } catch (error) {
+            console.error("PDF Generation Error:", error);
+            alert("Failed to generate PDF. Please try again.");
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
     return (
         <div className="bg-slate-50 min-h-screen pt-24 pb-20 px-4">
             <div className="max-w-4xl mx-auto">
@@ -71,13 +106,17 @@ const ResultsPage = () => {
                         <button className="p-2 bg-white rounded-xl border border-slate-200 text-slate-400 hover:text-primary-600 transition-colors">
                             <Share2 size={20} />
                         </button>
-                        <button className="p-2 bg-white rounded-xl border border-slate-200 text-slate-400 hover:text-primary-600 transition-colors">
-                            <Download size={20} />
+                        <button
+                            onClick={handleDownloadPDF}
+                            disabled={isGenerating}
+                            className="p-2 bg-white rounded-xl border border-slate-200 text-slate-400 hover:text-primary-600 transition-colors disabled:opacity-50"
+                        >
+                            {isGenerating ? <Loader2 size={20} className="animate-spin" /> : <Download size={20} />}
                         </button>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div ref={reportRef} className="grid grid-cols-1 lg:grid-cols-12 gap-8 p-4 md:p-0">
                     {/* Main Risk Card */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}

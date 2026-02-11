@@ -145,7 +145,7 @@ const DashboardPage = () => {
                         </div>
                     </div>
 
-                    <div className="h-[300px] w-full">
+                    <div className="h-[320px] w-full min-h-[320px]">
                         {loading ? (
                             <div className="h-full flex items-center justify-center text-slate-400">Loading your health data...</div>
                         ) : assessments.length < 2 ? (
@@ -155,7 +155,7 @@ const DashboardPage = () => {
                                 <Link to="/assessment" className="text-primary-600 text-sm font-bold hover:underline">Take another test →</Link>
                             </div>
                         ) : (
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height="100%" minHeight={300}>
                                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                     <defs>
                                         <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
