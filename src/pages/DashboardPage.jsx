@@ -5,6 +5,7 @@ import { Activity, Clock, ShieldAlert, FileText, Plus, ArrowRight, TrendingUp, U
 import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceArea } from 'recharts';
 
 const DashboardPage = () => {
     const { currentUser } = useAuth();
@@ -36,7 +37,7 @@ const DashboardPage = () => {
                 });
 
                 // Set only the top 5
-                setAssessments(fetchedAssessments.slice(0, 5));
+                setAssessments(fetchedAssessments);
             } catch (error) {
                 console.error("Error fetching assessments:", error);
             } finally {
@@ -46,6 +47,12 @@ const DashboardPage = () => {
 
         fetchAssessments();
     }, [currentUser]);
+
+    // Prepare chart data (reverse to show chronological order)
+    const chartData = assessments.slice(0, 7).reverse().map(item => ({
+        date: item.timestamp?.toDate().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        score: item.riskScore
+    }));
 
     const stats = [
         {
@@ -108,6 +115,116 @@ const DashboardPage = () => {
                     ))}
                 </div>
 
+                {/* Health Trend Chart */}
+                <motion.section
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm mb-12"
+                >
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                        <div>
+                            <h3 className="text-xl font-bold text-slate-800">Risk Analytics Trend</h3>
+                            <p className="text-sm text-slate-500">Historical performance of your early detection scans.</p>
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                            {assessments.length >= 2 && (
+                                <>
+                                    <div className="flex items-center gap-2 text-health-green bg-green-50 px-3 py-1 rounded-lg text-xs font-bold border border-green-100">
+                                        Min: {Math.min(...assessments.map(a => a.riskScore))}%
+                                    </div>
+                                    <div className="flex items-center gap-2 text-rose-600 bg-rose-50 px-3 py-1 rounded-lg text-xs font-bold border border-rose-100">
+                                        Peak: {Math.max(...assessments.map(a => a.riskScore))}%
+                                    </div>
+                                </>
+                            )}
+                            <div className="flex items-center gap-2 text-primary-600 bg-primary-50 px-3 py-1 rounded-lg text-xs font-bold border border-primary-100">
+                                <TrendingUp size={14} />
+                                AI Insight Active
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="h-[300px] w-full">
+                        {loading ? (
+                            <div className="h-full flex items-center justify-center text-slate-400">Loading your health data...</div>
+                        ) : assessments.length < 2 ? (
+                            <div className="h-full flex flex-col items-center justify-center text-slate-400 gap-4">
+                                <Activity size={32} className="opacity-20 translate-y-2" />
+                                <p className="text-sm">Complete at least 2 assessments to see your health trend line.</p>
+                                <Link to="/assessment" className="text-primary-600 text-sm font-bold hover:underline">Take another test →</Link>
+                            </div>
+                        ) : (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+
+                                    {/* Risk Zones */}
+                                    <ReferenceArea y1={0} y2={15} fill="#f0fdf4" fillOpacity={0.6} label={{ position: 'insideLeft', value: 'SAFE', fill: '#16a34a', fontSize: 10, fontWeight: 'bold' }} />
+                                    <ReferenceArea y1={15} y2={30} fill="#fffbeb" fillOpacity={0.6} label={{ position: 'insideLeft', value: 'MONITOR', fill: '#d97706', fontSize: 10, fontWeight: 'bold' }} />
+                                    <ReferenceArea y1={30} y2={100} fill="#fef2f2" fillOpacity={0.6} label={{ position: 'insideLeft', value: 'HIGH', fill: '#dc2626', fontSize: 10, fontWeight: 'bold' }} />
+
+                                    <XAxis
+                                        dataKey="date"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }}
+                                        dy={15}
+                                    />
+                                    <YAxis
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: '#94a3b8', fontSize: 10 }}
+                                        domain={[0, 45]}
+                                    />
+                                    <Tooltip
+                                        content={({ active, payload }) => {
+                                            if (active && payload && payload.length) {
+                                                const score = payload[0].value;
+                                                const status = score < 15 ? "Excellent" : score < 30 ? "Monitor" : "Attention Required";
+                                                const color = score < 15 ? "text-health-green" : score < 30 ? "text-amber-500" : "text-rose-500";
+                                                return (
+                                                    <div className="bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-2xl border border-slate-100 animate-slide-up">
+                                                        <p className="text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">{payload[0].payload.date}</p>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={`text-2xl font-black ${color}`}>{score}%</div>
+                                                            <div className="h-8 w-[1px] bg-slate-100"></div>
+                                                            <div className="text-xs font-bold text-slate-600 leading-tight">
+                                                                Risk Level<br />
+                                                                <span className={color}>{status}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        }}
+                                        cursor={{ stroke: '#3b82f6', strokeWidth: 2, strokeDasharray: '6 6' }}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="score"
+                                        stroke="#2563eb"
+                                        strokeWidth={4}
+                                        fillOpacity={1}
+                                        fill="url(#colorScore)"
+                                        dot={{ r: 6, fill: '#fff', stroke: '#2563eb', strokeWidth: 3 }}
+                                        activeDot={{ r: 8, fill: '#2563eb', stroke: '#fff', strokeWidth: 4, shadow: '0 0 10px rgba(37, 99, 235, 0.5)' }}
+                                        animationDuration={2000}
+                                        animationEasing="ease-in-out"
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
+                </motion.section>
+
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Content Area */}
                     <div className="lg:col-span-2 space-y-8">
@@ -123,7 +240,7 @@ const DashboardPage = () => {
                                 ) : assessments.length === 0 ? (
                                     <div className="p-12 text-center text-slate-400">No assessments found. Start one today!</div>
                                 ) : (
-                                    assessments.map((item) => (
+                                    assessments.slice(0, 5).map((item) => (
                                         <div key={item.id} className="p-6 flex items-center justify-between hover:bg-slate-50 transition-colors">
                                             <div className="flex items-center gap-4">
                                                 <div className="bg-slate-100 p-2 rounded-lg">
