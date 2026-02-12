@@ -4,20 +4,21 @@ import { motion } from 'framer-motion';
 import { Activity, Clock, ShieldAlert, FileText, Plus, ArrowRight, TrendingUp, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
-import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, limit, doc, getDoc } from 'firebase/firestore';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceArea } from 'recharts';
 
 const DashboardPage = () => {
     const { currentUser } = useAuth();
     const [assessments, setAssessments] = useState([]);
+    const [userProfile, setUserProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const userName = currentUser?.displayName || "Guest";
 
     useEffect(() => {
-        const fetchAssessments = async () => {
+        const fetchData = async () => {
             if (!currentUser) return;
             try {
-                // Simplified query to avoid "composite index" requirement
+                // 1. Fetch Assessments
                 const q = query(
                     collection(db, "assessments"),
                     where("userId", "==", currentUser.uid)
@@ -29,24 +30,31 @@ const DashboardPage = () => {
                     ...doc.data()
                 }));
 
-                // Sort by timestamp in JavaScript (descending)
                 fetchedAssessments.sort((a, b) => {
                     const timeA = a.timestamp?.seconds || 0;
                     const timeB = b.timestamp?.seconds || 0;
                     return timeB - timeA;
                 });
 
-                // Set only the top 5
                 setAssessments(fetchedAssessments);
+
+                // 2. Fetch Profile Completion Status
+                const profileRef = doc(db, "users", currentUser.uid);
+                const profileSnap = await getDoc(profileRef);
+                if (profileSnap.exists()) {
+                    setUserProfile(profileSnap.data());
+                }
             } catch (error) {
-                console.error("Error fetching assessments:", error);
+                console.error("Error fetching data:", error);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchAssessments();
+        fetchData();
     }, [currentUser]);
+
+    const isProfileComplete = userProfile?.age && userProfile?.height && userProfile?.weight;
 
     // Prepare chart data (reverse to show chronological order)
     const chartData = assessments.slice(0, 7).reverse().map(item => ({
@@ -78,6 +86,30 @@ const DashboardPage = () => {
     return (
         <div className="bg-slate-50 min-h-screen pt-24 pb-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                {/* Profile Completion Multi-Banner */}
+                {!loading && !isProfileComplete && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-indigo-600 rounded-3xl p-6 md:p-8 mb-10 text-white shadow-2xl shadow-indigo-200 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6"
+                    >
+                        <div className="relative z-10 text-center md:text-left">
+                            <h2 className="text-2xl font-black mb-2 flex items-center justify-center md:justify-start gap-3 uppercase tracking-tight">
+                                <Activity className="text-indigo-200" /> Complete Your Health Profile
+                            </h2>
+                            <p className="text-indigo-100 font-medium max-w-lg">
+                                For high-precision AI risk detection, we need your baseline metrics like age, height, and weight.
+                            </p>
+                        </div>
+                        <Link to="/profile" className="relative z-10 bg-white text-indigo-600 px-8 py-4 rounded-2xl font-black hover:bg-slate-50 transition-all shadow-xl whitespace-nowrap">
+                            Complete Setup →
+                        </Link>
+                        {/* Decorative BG element */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+                    </motion.div>
+                )}
+
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
                     <motion.div
@@ -307,14 +339,14 @@ const DashboardPage = () => {
                         <section className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
                             <h3 className="text-xl font-bold text-slate-800 mb-4">Quick Actions</h3>
                             <div className="grid grid-cols-2 gap-4">
-                                <button className="flex flex-col items-center gap-2 p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all group">
+                                <Link to="/profile" className="flex flex-col items-center gap-2 p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all group">
                                     <div className="bg-white p-3 rounded-xl shadow-sm text-primary-600 group-hover:scale-110 transition-transform"><User size={20} /></div>
                                     <span className="text-sm font-medium text-slate-700">Profile</span>
-                                </button>
-                                <button className="flex flex-col items-center gap-2 p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all group">
+                                </Link>
+                                <Link to="/dashboard" className="flex flex-col items-center gap-2 p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all group">
                                     <div className="bg-white p-3 rounded-xl shadow-sm text-health-teal group-hover:scale-110 transition-transform"><FileText size={20} /></div>
                                     <span className="text-sm font-medium text-slate-700">Reports</span>
-                                </button>
+                                </Link>
                             </div>
                         </section>
                     </div>

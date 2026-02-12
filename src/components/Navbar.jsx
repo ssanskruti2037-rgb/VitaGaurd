@@ -60,8 +60,12 @@ const Navbar = () => {
                         ))}
 
                         {currentUser ? (
-                            <div className="flex items-center space-x-4">
-                                <Link to="/dashboard" className="text-slate-600 hover:text-primary-600 font-medium">Dashboard</Link>
+                            <div className="flex items-center space-x-6">
+                                <Link to="/dashboard" className="text-slate-600 hover:text-primary-600 font-medium transition-colors">Dashboard</Link>
+                                <Link to="/profile" className="flex items-center gap-2 text-slate-600 hover:text-primary-600 font-medium bg-slate-50 px-3 py-1.5 rounded-xl transition-all border border-slate-100 italic">
+                                    <User size={16} className="text-primary-600" />
+                                    Profile
+                                </Link>
                                 <button
                                     onClick={handleLogout}
                                     className="bg-slate-100 text-slate-700 px-4 py-2 rounded-full hover:bg-slate-200 transition-all"
@@ -103,7 +107,8 @@ const Navbar = () => {
                         <hr className="my-2 border-slate-100" />
                         {currentUser ? (
                             <>
-                                <Link to="/dashboard" className="block px-3 py-2 text-slate-600" onClick={() => setIsOpen(false)}>Dashboard</Link>
+                                <Link to="/dashboard" className="block px-3 py-2 text-slate-600 rounded-lg hover:bg-slate-50" onClick={() => setIsOpen(false)}>Dashboard</Link>
+                                <Link to="/profile" className="block px-3 py-2 text-primary-600 font-bold rounded-lg bg-primary-50" onClick={() => setIsOpen(false)}>Health Profile</Link>
                                 <button onClick={() => { handleLogout(); setIsOpen(false); }} className="w-full text-left px-3 py-2 text-slate-600">Logout</button>
                             </>
                         ) : (

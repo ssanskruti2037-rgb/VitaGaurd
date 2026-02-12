@@ -5,12 +5,14 @@ import { useAuth } from '../context/AuthContext';
 import { useRef, useState } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import MedicalReportTemplate from '../components/MedicalReportTemplate';
 
 const ResultsPage = () => {
     const { currentUser } = useAuth();
     const location = useLocation();
     const assessmentData = location.state || {};
     const reportRef = useRef(null);
+    const pdfTemplateRef = useRef(null);
     const [isGenerating, setIsGenerating] = useState(false);
 
     // Determine risk level based on score
@@ -64,30 +66,44 @@ const ResultsPage = () => {
     const ringColor = result.riskLevel === "Low" ? "stroke-health-green" : result.riskLevel === "Moderate" ? "stroke-amber-500" : "stroke-rose-500";
 
     const handleDownloadPDF = async () => {
-        if (!reportRef.current) return;
+        if (!pdfTemplateRef.current) return;
 
         setIsGenerating(true);
         try {
-            const element = reportRef.current;
+            const element = pdfTemplateRef.current;
+
+            // Show temporarily for capture (reset hidden styles)
+            const originalStyle = element.style.cssText;
+            element.style.position = 'static';
+            element.style.left = '0';
+            element.style.zIndex = '9999';
+
             const canvas = await html2canvas(element, {
-                scale: 2, // Higher quality
+                scale: 3, // Very high quality for print
                 useCORS: true,
                 logging: false,
-                backgroundColor: "#f8fafc" // Match slate-50
+                backgroundColor: "#ffffff",
+                windowWidth: 800
             });
 
-            const imgData = canvas.toDataURL('image/png');
+            // Re-hide the template
+            element.style.cssText = originalStyle;
+
+            const imgData = canvas.toDataURL('image/png', 1.0);
             const pdf = new jsPDF({
                 orientation: 'portrait',
                 unit: 'px',
-                format: [canvas.width / 2, canvas.height / 2]
+                format: 'a4'
             });
 
-            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width / 2, canvas.height / 2);
-            pdf.save(`VitaGuard_Report_${result.userName.replace(/\s+/g, '_')}_${new Date().getTime()}.pdf`);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save(`VitaGuard_Analysis_Report_${result.userName.replace(/\s+/g, '_')}.pdf`);
         } catch (error) {
             console.error("PDF Generation Error:", error);
-            alert("Failed to generate PDF. Please try again.");
+            alert("Failed to generate official report. Please try again.");
         } finally {
             setIsGenerating(false);
         }
@@ -95,6 +111,13 @@ const ResultsPage = () => {
 
     return (
         <div className="bg-slate-50 min-h-screen pt-24 pb-20 px-4">
+            {/* Hidden Medical Template for PDF Generation */}
+            <MedicalReportTemplate
+                ref={pdfTemplateRef}
+                result={result}
+                formData={assessmentData.formData || {}}
+            />
+
             <div className="max-w-4xl mx-auto">
                 {/* Header Actions */}
                 <div className="flex justify-between items-center mb-8">

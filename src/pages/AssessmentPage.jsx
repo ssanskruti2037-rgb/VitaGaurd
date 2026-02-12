@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HeartPulse, ChevronRight, ChevronLeft, Activity, Info, Loader2 } from 'lucide-react';
 
 import { db } from '../firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 
 const AssessmentPage = () => {
@@ -23,6 +23,31 @@ const AssessmentPage = () => {
         smoking: '',
         alcohol: ''
     });
+
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            if (!currentUser) return;
+            try {
+                const docRef = doc(db, "users", currentUser.uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    setFormData(prev => ({
+                        ...prev,
+                        name: data.displayName || currentUser.displayName || prev.name,
+                        age: data.age || prev.age,
+                        gender: data.gender || prev.gender,
+                        height: data.height || prev.height,
+                        weight: data.weight || prev.weight
+                    }));
+                }
+            } catch (error) {
+                console.error("Error fetching profile for pre-fill:", error);
+            }
+        };
+
+        fetchUserProfile();
+    }, [currentUser]);
 
     const navigate = useNavigate();
 
@@ -62,7 +87,7 @@ const AssessmentPage = () => {
         // 3. Keep the user in the 'Processing' state for exactly 2 seconds for UX
         setTimeout(() => {
             setLoading(false);
-            navigate('/results', { state: { score: riskScore, name: formData.name } });
+            navigate('/results', { state: { score: riskScore, name: formData.name, formData: formData } });
         }, 2000);
     };
 
