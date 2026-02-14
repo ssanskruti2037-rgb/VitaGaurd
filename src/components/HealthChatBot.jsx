@@ -127,24 +127,24 @@ const HealthChatBot = ({ reportData }) => {
             >
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="flex items-center gap-4 bg-slate-900 text-white p-2 pr-6 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:bg-black transition-all group border border-slate-800"
+                    className="flex items-center gap-4 bg-white dark:bg-dark-card p-2 pr-6 rounded-[2.5rem] sticker group border-4 border-slate-900 dark:border-white"
                 >
                     <div className="relative">
-                        <div className="w-14 h-14 bg-gradient-to-br from-primary-500 to-health-cyber rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500">
-                            <Bot size={32} className="text-white" />
+                        <div className="w-14 h-14 bg-gradient-to-br from-primary-400 to-health-cyber rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500">
+                            <span className="text-3xl">🤖</span>
                         </div>
-                        <div className="absolute -bottom-1 -right-1 bg-white dark:bg-dark-card p-1.5 rounded-full shadow-md border border-slate-100 dark:border-slate-800">
-                            <Stethoscope size={14} className="text-primary-600" />
+                        <div className="absolute -bottom-1 -right-1 bg-white dark:bg-dark-card p-1.5 rounded-full shadow-md border-2 border-slate-900">
+                            <span className="text-xs">🩺</span>
                         </div>
                     </div>
                     <div className="flex flex-col items-start">
-                        <span className="font-black text-sm tracking-tight">AI Health Bot</span>
+                        <span className="font-black text-sm tracking-tight text-slate-900 dark:text-white">AI Doctor</span>
                         <div className="flex items-center gap-1.5 mt-0.5">
                             <span className="relative flex h-2 w-2">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-health-emerald opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-health-emerald"></span>
                             </span>
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Live Analysis</span>
+                            <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Live Help</span>
                         </div>
                     </div>
                 </button>

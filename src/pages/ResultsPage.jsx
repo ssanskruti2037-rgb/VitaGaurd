@@ -1,7 +1,7 @@
 // Forced refresh for chatbot visibility check
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShieldAlert, CheckCircle2, AlertTriangle, ArrowLeft, Download, Share2, Info, Loader2, Lightbulb, Sparkles, Cpu } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, CheckCircle2, AlertTriangle, ArrowLeft, Download, Share2, Info, Loader2, Lightbulb, Sparkles, Cpu } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useRef, useState } from 'react';
 import jsPDF from 'jspdf';
@@ -9,6 +9,9 @@ import html2canvas from 'html2canvas';
 import MedicalReportTemplate from '../components/MedicalReportTemplate';
 import { analyzeHealthWithGemini } from '../services/gemini';
 import HealthChatBot from '../components/HealthChatBot';
+import GenZIcon from '../components/GenZIcon';
+import confetti from 'canvas-confetti';
+import { useEffect } from 'react';
 
 const ResultsPage = () => {
     const { currentUser } = useAuth();
@@ -20,6 +23,32 @@ const ResultsPage = () => {
 
     const currentName = assessmentData.name || currentUser?.displayName || "User";
     const formData = assessmentData.formData || {};
+
+    // Trigger celebration if risk is low
+    useEffect(() => {
+        const result = getResultSync();
+        if (result && result.riskLevel === "Low") {
+            const duration = 3 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+            const interval = setInterval(function () {
+                const timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                const particleCount = 50 * (timeLeft / duration);
+                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+            }, 250);
+
+            return () => clearInterval(interval);
+        }
+    }, []);
 
     // Use Gemini AI analysis if available, otherwise call the deterministic fallback engine
     const getResult = () => {
@@ -175,8 +204,8 @@ const ResultsPage = () => {
 
     const getRiskColor = (level) => {
         switch (level) {
-            case "Low": return "text-health-green bg-green-50 border-green-100";
-            case "Moderate": return "text-amber-600 bg-amber-50 border-amber-100";
+            case "Low": return "text-emerald-500 bg-emerald-50 border-emerald-100";
+            case "Moderate": return "text-amber-500 bg-amber-50 border-amber-100";
             case "High": return "text-rose-600 bg-rose-50 border-rose-100";
             default: return "text-slate-600 bg-slate-50 border-slate-100";
         }
@@ -184,10 +213,10 @@ const ResultsPage = () => {
 
     const getRiskIcon = (level) => {
         switch (level) {
-            case "Low": return <CheckCircle2 className="h-12 w-12 text-health-green" />;
-            case "Moderate": return <AlertTriangle className="h-12 w-12 text-amber-500" />;
-            case "High": return <ShieldAlert className="h-12 w-12 text-rose-500" />;
-            default: return <Info className="h-12 w-12 text-slate-400" />;
+            case "Low": return <GenZIcon icon={ShieldCheck} color="text-emerald-500" glowColor="bg-emerald-500/20" />;
+            case "Moderate": return <GenZIcon icon={AlertTriangle} color="text-amber-500" glowColor="bg-amber-500/20" />;
+            case "High": return <GenZIcon icon={ShieldAlert} color="text-rose-500" glowColor="bg-rose-500/20" />;
+            default: return <GenZIcon icon={Info} color="text-slate-500" glowColor="bg-slate-500/20" />;
         }
     };
 
@@ -339,7 +368,7 @@ const ResultsPage = () => {
                     >
                         <div className="bg-white dark:bg-dark-card rounded-[2rem] p-8 shadow-lg border border-slate-100 dark:border-dark-border h-full">
                             <h3 className="text-2xl font-bold text-slate-800 mb-8 flex items-center gap-3">
-                                <ShieldAlert className="text-primary-600" />
+                                <span className="text-3xl">🛡️</span>
                                 Recommended Precautions
                             </h3>
                             <ul className="space-y-6">

@@ -44,6 +44,10 @@ export default {
                 'premium': '0 10px 40px -10px rgba(0, 0, 0, 0.05)',
                 'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
                 'glow': '0 0 20px rgba(45, 86, 247, 0.2)',
+                'sticker': '4px 4px 0px 0px rgba(15, 23, 42, 0.05)',
+                'sticker-dark': '4px 4px 0px 0px rgba(255, 255, 255, 0.05)',
+                'cartoon': '0 8px 30px rgba(0, 0, 0, 0.12)',
+                'cartoon-dark': '0 8px 30px rgba(255, 255, 255, 0.03)',
             },
             animation: {
                 'fade-in': 'fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',

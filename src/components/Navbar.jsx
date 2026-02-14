@@ -1,25 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, HeartPulse, User, Home, Info, Sparkles, LayoutDashboard, LogOut, Sun, Moon } from 'lucide-react';
+import { Menu, X, Home, Info, Sparkles, LayoutDashboard, LogOut, Sun, Moon, Zap, User, HeartPulse } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebase';
 
 const Navbar = () => {
-    const { currentUser, logout } = useAuth();
+    const { currentUser } = useAuth();
     const { theme, toggleTheme } = useTheme();
-    const [isOpen, setIsOpen] = useState(false);
-    const [scrolled, setScrolled] = useState(false);
-    const location = useLocation();
     const navigate = useNavigate();
-
-    useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 20);
-        };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+    const [isOpen, setIsOpen] = useState(false);
+    const location = useLocation();
 
     const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -31,21 +24,20 @@ const Navbar = () => {
 
     const handleLogout = async () => {
         try {
-            await logout();
-            navigate('/');
+            await signOut(auth);
         } catch (error) {
-            console.error("Failed to log out", error);
+            console.error('Logout error:', error);
         }
     };
 
     return (
-        <nav className={`fixed w-full z-[100] transition-all duration-500 ${scrolled ? 'bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-premium border-b border-slate-100 dark:border-slate-800 py-3' : 'bg-white/40 dark:bg-slate-900/40 backdrop-blur-md py-5'}`}>
+        <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-dark-bg/70 backdrop-blur-xl border-b border-white/20 dark:border-dark-border/50 transition-all duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
                     <Link to="/" className="flex items-center space-x-2 group">
-                        <div className="bg-primary-600 p-1.5 rounded-xl shadow-glow group-hover:scale-110 transition-transform duration-300">
-                            <HeartPulse className="h-6 w-6 text-white" />
+                        <div className="bg-primary-600 p-2 rounded-xl shadow-glow group-hover:rotate-12 transition-transform duration-300 flex items-center justify-center h-10 w-10">
+                            <Zap className="h-6 w-6 text-white" fill="currentColor" />
                         </div>
                         <span className="text-2xl font-black bg-gradient-to-r from-primary-700 via-primary-600 to-health-cyber bg-clip-text text-transparent tracking-tight">
                             VitaGuard

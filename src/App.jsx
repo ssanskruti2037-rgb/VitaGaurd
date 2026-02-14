@@ -17,11 +17,13 @@ import ScrollToTop from './components/ScrollToTop';
 
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
     return (
         <AuthProvider>
             <ThemeProvider>
+                <Toaster position="top-right" reverseOrder={false} />
                 <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
                     <ScrollToTop />
                     <div className="min-h-screen flex flex-col bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition-colors duration-300">

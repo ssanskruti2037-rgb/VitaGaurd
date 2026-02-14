@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Activity, Clock, ShieldAlert, FileText, Plus, ArrowRight, TrendingUp, User, Lock, ShieldCheck } from 'lucide-react';
+import {
+    Activity, Clock, ShieldAlert, FileText, Plus, ArrowRight,
+    TrendingUp, User, Lock, ShieldCheck, Calendar, Lightbulb, AlertCircle
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
 import { collection, query, where, getDocs, orderBy, limit, doc, getDoc } from 'firebase/firestore';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceArea } from 'recharts';
+import GenZIcon from '../components/GenZIcon';
 
 const DashboardPage = () => {
     const { currentUser } = useAuth();
@@ -84,7 +88,7 @@ const DashboardPage = () => {
             bgColor: assessments.length > 0
                 ? (assessments[0].riskScore < 15 ? "bg-emerald-50" : assessments[0].riskScore < 30 ? "bg-amber-50" : "bg-rose-50")
                 : "bg-slate-50",
-            icon: <ShieldAlert size={22} />,
+            icon: <GenZIcon icon={ShieldCheck} color="text-emerald-500" glowColor="bg-emerald-500/20" />,
             trend: assessments.length > 1 ? (assessments[0].riskScore < assessments[1].riskScore ? "improving" : "stable") : "baseline"
         },
         {
@@ -92,7 +96,7 @@ const DashboardPage = () => {
             value: assessments.length > 0 ? assessments[0].timestamp?.toDate?.().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : "Never",
             color: "text-primary-600",
             bgColor: "bg-primary-50",
-            icon: <Clock size={22} />,
+            icon: <GenZIcon icon={Calendar} color="text-primary-600" glowColor="bg-primary-600/20" />,
             trend: assessments.length > 0 ? "recent" : "pending"
         },
         {
@@ -100,7 +104,7 @@ const DashboardPage = () => {
             value: assessments.length > 0 ? "3 Alerts" : "0 Alerts",
             color: "text-health-cyber",
             bgColor: "bg-cyan-50",
-            icon: <TrendingUp size={22} />,
+            icon: <GenZIcon icon={Lightbulb} color="text-health-cyber" glowColor="bg-cyan-500/20" />,
             trend: "analyzing"
         }
     ];
@@ -166,13 +170,7 @@ const DashboardPage = () => {
                     className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12"
                 >
                     <motion.div variants={itemVariants}>
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50 text-emerald-600 dark:text-emerald-400 font-black text-[10px] uppercase tracking-widest mb-4 shadow-sm">
-                            <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                            </span>
-                            AI Monitoring Active
-                        </div>
+
                         <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">
                             Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-health-cyber">{userName}</span>
                         </h1>

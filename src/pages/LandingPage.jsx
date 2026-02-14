@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, Activity, LineChart, Lock, ArrowRight, CheckCircle2, X, Microscope, Database, FileText } from 'lucide-react';
+import { ShieldCheck, Activity, LineChart, Lock, ArrowRight, CheckCircle2, X, Microscope, Database, FileText, Brain, HeartPulse } from 'lucide-react';
+import GenZIcon from '../components/GenZIcon';
 import { useAuth } from '../context/AuthContext';
 
 const LandingPage = () => {
@@ -25,7 +26,7 @@ const LandingPage = () => {
         "01": {
             title: "Biometric Intake Protocol",
             subtitle: "Data Collection & Calibration",
-            icon: <Microscope size={32} className="text-blue-500" />,
+            icon: <GenZIcon icon={Microscope} color="text-blue-500" glowColor="bg-blue-500/20" />,
             content: "Our system gathers baseline health markers including age, gender, BMI (via height/weight), and specific physical symptoms. This phase uses 'Smart Matching' to cross-reference your inputs with demographic risk pools.",
             features: ["Personal Health Profiling", "Symptom Categorization", "Baseline Calibration"],
             color: "from-blue-600 to-indigo-600"
@@ -33,7 +34,7 @@ const LandingPage = () => {
         "02": {
             title: "Neural Analysis Engine",
             subtitle: "Algorithmic Risk Assessment",
-            icon: <Database size={32} className="text-cyan-500" />,
+            icon: <GenZIcon icon={Brain} color="text-cyan-500" glowColor="bg-cyan-500/20" />,
             content: "Your data is processed through our Vita-Neural engine. We compare your symptoms against 10,000+ medical case studies to identify early-stage risk markers for cardiovascular, respiratory, and metabolic conditions.",
             features: ["Pattern Recognition", "Medical Database Scanning", "Probability Scoring"],
             color: "from-health-cyber to-blue-500"
@@ -41,7 +42,7 @@ const LandingPage = () => {
         "03": {
             title: "Clinical Synthesis",
             subtitle: "Intelligent Action Planning",
-            icon: <FileText size={32} className="text-slate-800" />,
+            icon: <GenZIcon icon={FileText} color="text-slate-800" glowColor="bg-slate-800/20" />,
             content: "The final output is a clinical-grade risk report. Our AI generates personalized precautions and calculates a 'Severity Score' to help you determine if immediate medical consultation is required.",
             features: ["Risk Level Classification", "Custom Precautions", "PDF Health Documentation"],
             color: "from-slate-800 to-slate-900"
@@ -247,7 +248,7 @@ const LandingPage = () => {
                         {[
                             {
                                 step: "01",
-                                icon: <Activity className="text-white" size={28} />,
+                                icon: <GenZIcon icon={Activity} color="text-white" glowColor="bg-white/20" />,
                                 title: "Biometric Intake",
                                 desc: "Our intelligent gateway synchronizes with your existing health metrics and symptoms.",
                                 color: "from-blue-600 to-indigo-600",
@@ -255,7 +256,7 @@ const LandingPage = () => {
                             },
                             {
                                 step: "02",
-                                icon: <LineChart className="text-white" size={28} />,
+                                icon: <GenZIcon icon={LineChart} color="text-white" glowColor="bg-white/20" />,
                                 title: "Neural Processing",
                                 desc: "Thousands of medical data points are scanned against your profile using our pro-logic models.",
                                 color: "from-health-cyber to-blue-500",
@@ -263,7 +264,7 @@ const LandingPage = () => {
                             },
                             {
                                 step: "03",
-                                icon: <CheckCircle2 className="text-white" size={28} />,
+                                icon: <GenZIcon icon={CheckCircle2} color="text-white" glowColor="bg-white/20" />,
                                 title: "Clinical Synthesis",
                                 desc: "A high-fidelity report is generated with exact risk classifications and preventive measures.",
                                 color: "from-slate-800 to-slate-900",
@@ -337,10 +338,10 @@ const LandingPage = () => {
                             </motion.div>
                             <div className="space-y-6">
                                 {[
-                                    { icon: <Activity className="text-primary-500" />, title: "Symptom Checker", desc: "Detailed analysis of your current physical symptoms." },
-                                    { icon: <LineChart className="text-health-teal" />, title: "Predictive Analytics", desc: "Identify long-term health risks based on lifestyle data." },
-                                    { icon: <Lock className="text-health-green" />, title: "Secure Data Storage", desc: "Your health records are encrypted and kept strictly private." },
-                                    { icon: <ShieldCheck className="text-primary-600" />, title: "Early Warnings", desc: "Prevent serious illness with proactive health indicators." }
+                                    { icon: <GenZIcon icon={Activity} color="text-primary-500" />, title: "Symptom Checker", desc: "Detailed analysis of your current physical symptoms." },
+                                    { icon: <GenZIcon icon={LineChart} color="text-health-teal" />, title: "Predictive Analytics", desc: "Identify long-term health risks based on lifestyle data." },
+                                    { icon: <GenZIcon icon={Lock} color="text-health-green" />, title: "Secure Data Storage", desc: "Your health records are encrypted and kept strictly private." },
+                                    { icon: <GenZIcon icon={ShieldCheck} color="text-primary-600" />, title: "Early Warnings", desc: "Prevent serious illness with proactive health indicators." }
                                 ].map((feature, idx) => (
                                     <div key={idx} className="flex items-start gap-4">
                                         <div className="bg-white dark:bg-dark-card p-3 rounded-xl shadow-sm mt-1">{feature.icon}</div>
