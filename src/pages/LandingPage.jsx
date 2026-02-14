@@ -49,7 +49,7 @@ const LandingPage = () => {
     };
 
     return (
-        <div className="overflow-x-hidden bg-white selection:bg-primary-100 selection:text-primary-700">
+        <div className="overflow-x-hidden bg-white dark:bg-slate-900 selection:bg-primary-100 selection:text-primary-700 transition-colors duration-300">
             {/* Modal Overlay */}
             <AnimatePresence>
                 {activeStep && (
@@ -136,11 +136,11 @@ const LandingPage = () => {
                         >
 
 
-                            <motion.h1 variants={itemVariants} className="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[1.1] mb-8 tracking-tight">
+                            <motion.h1 variants={itemVariants} className="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 dark:text-white leading-[1.1] mb-8 tracking-tight">
                                 Health Risk <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-health-cyber">Detection</span> Reimagined.
                             </motion.h1>
 
-                            <motion.p variants={itemVariants} className="text-xl text-slate-500 mb-12 max-w-xl lg:mx-0 mx-auto leading-relaxed font-medium">
+                            <motion.p variants={itemVariants} className="text-xl text-slate-500 dark:text-slate-400 mb-12 max-w-xl lg:mx-0 mx-auto leading-relaxed font-medium">
                                 Stay ahead of medical concerns with VitaGuard's sophisticated AI engine. We analyze your data to provide clinical-grade insights before they become serious.
                             </motion.p>
 
@@ -210,7 +210,7 @@ const LandingPage = () => {
             </section>
 
             {/* How It Works Section */}
-            <section id="how-it-works" className="py-32 bg-white relative overflow-hidden">
+            <section id="how-it-works" className="py-32 bg-white dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
                 {/* Visual Connection Line (Desktop) */}
                 <div className="absolute top-[60%] left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary-100 to-transparent hidden md:block z-0"></div>
 
@@ -228,7 +228,7 @@ const LandingPage = () => {
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            className="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter mb-6"
+                            className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter mb-6"
                         >
                             Precision <span className="italic text-primary-600">Workflow</span>
                         </motion.h2>
@@ -237,7 +237,7 @@ const LandingPage = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.2 }}
-                            className="text-lg text-slate-500 max-w-2xl mx-auto font-medium"
+                            className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-medium"
                         >
                             Our diagnostic engine transforms raw data into clinical intelligence through a three-stage neural architecture.
                         </motion.p>
@@ -284,7 +284,7 @@ const LandingPage = () => {
                                     {item.step}
                                 </div>
 
-                                <div className="glass-card p-10 rounded-[3rem] border-slate-100 hover:border-white hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] transition-all duration-700 h-full flex flex-col items-center text-center group">
+                                <div className="glass-card bg-white/50 dark:bg-slate-800/50 p-10 rounded-[3rem] border-slate-100 dark:border-slate-700 hover:border-white dark:hover:border-slate-600 hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] transition-all duration-700 h-full flex flex-col items-center text-center group">
                                     {/* Icon Container with Gradient Orb */}
                                     <div className="relative mb-8">
                                         <div className={`absolute inset-0 ${item.glow} blur-2xl rounded-full scale-150 group-hover:scale-[2] transition-transform duration-700`}></div>
@@ -296,11 +296,11 @@ const LandingPage = () => {
                                     <div className="mb-4">
                                         <div className="flex flex-col items-center">
                                             <span className="text-[10px] font-black text-primary-600 uppercase tracking-widest bg-primary-50 px-3 py-1 rounded-full mb-3 inline-block">Stage {item.step}</span>
-                                            <h3 className="text-2xl font-black text-slate-900 tracking-tight">{item.title}</h3>
+                                            <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{item.title}</h3>
                                         </div>
                                     </div>
 
-                                    <p className="text-slate-500 leading-relaxed font-medium">
+                                    <p className="text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
                                         {item.desc}
                                     </p>
 
@@ -319,7 +319,7 @@ const LandingPage = () => {
             </section>
 
             {/* Features Section */}
-            <section id="features" className="py-32 bg-slate-50/50 relative">
+            <section id="features" className="py-32 bg-slate-50/50 dark:bg-slate-800/50 relative transition-colors duration-300">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col lg:flex-row items-center gap-20">
                         <div className="w-full lg:w-1/2">
@@ -328,10 +328,10 @@ const LandingPage = () => {
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
                             >
-                                <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-8 leading-[1.1] tracking-tight">
+                                <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-8 leading-[1.1] tracking-tight">
                                     Premium Features for Your <span className="text-primary-600">Health</span>
                                 </h2>
-                                <p className="text-lg text-slate-500 mb-12 font-medium">
+                                <p className="text-lg text-slate-500 dark:text-slate-400 mb-12 font-medium">
                                     Our platform combines medical expertise with advanced AI to give you the most accurate proactive health tools.
                                 </p>
                             </motion.div>

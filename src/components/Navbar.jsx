@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, HeartPulse, User, Home, Info, Sparkles, LayoutDashboard, LogOut } from 'lucide-react';
+import { Menu, X, HeartPulse, User, Home, Info, Sparkles, LayoutDashboard, LogOut, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { motion } from 'framer-motion';
 
 const Navbar = () => {
     const { currentUser, logout } = useAuth();
+    const { theme, toggleTheme } = useTheme();
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const location = useLocation();
@@ -37,7 +39,7 @@ const Navbar = () => {
     };
 
     return (
-        <nav className={`fixed w-full z-[100] transition-all duration-500 ${scrolled ? 'bg-white/90 backdrop-blur-xl shadow-premium border-b border-slate-100 py-3' : 'bg-white/40 backdrop-blur-md py-5'}`}>
+        <nav className={`fixed w-full z-[100] transition-all duration-500 ${scrolled ? 'bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-premium border-b border-slate-100 dark:border-slate-800 py-3' : 'bg-white/40 dark:bg-slate-900/40 backdrop-blur-md py-5'}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
@@ -80,9 +82,23 @@ const Navbar = () => {
                                     </span>
                                 </motion.button>
                             ))}
+
+                            {/* Theme Toggle Button */}
+                            <motion.button
+                                whileHover={{ scale: 1.1, backgroundColor: theme === 'dark' ? 'rgba(30, 41, 59, 0.8)' : 'rgba(255,255,255,1)' }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={toggleTheme}
+                                className="p-3 text-slate-500 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 rounded-xl transition-colors relative group"
+                                title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                            >
+                                {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                                <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-slate-800 text-white text-[10px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none uppercase tracking-widest whitespace-nowrap">
+                                    {theme === 'dark' ? 'Light' : 'Dark'}
+                                </span>
+                            </motion.button>
                         </div>
 
-                        <div className="h-8 w-px bg-slate-200 mx-2"></div>
+                        <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 mx-2"></div>
 
                         {currentUser ? (
                             <div className="flex items-center space-x-4">
@@ -114,8 +130,14 @@ const Navbar = () => {
                     </div>
 
                     {/* Mobile Menu Button */}
-                    <div className="md:hidden">
-                        <button onClick={toggleMenu} className="p-2 text-slate-600 hover:text-primary-600 bg-slate-50 rounded-xl border border-slate-100">
+                    <div className="md:hidden flex items-center gap-4">
+                        <button
+                            onClick={toggleTheme}
+                            className="p-2 text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700"
+                        >
+                            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                        </button>
+                        <button onClick={toggleMenu} className="p-2 text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
                             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                         </button>
                     </div>

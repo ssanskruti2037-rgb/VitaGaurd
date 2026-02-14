@@ -27,7 +27,7 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 pt-20 relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 px-4 pt-20 relative overflow-hidden transition-colors duration-300">
             {/* Background Decorations */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                 <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-primary-100/50 blur-[100px] rounded-full animate-float"></div>
@@ -48,8 +48,8 @@ const LoginPage = () => {
                             VitaGuard
                         </span>
                     </Link>
-                    <h2 className="text-4xl font-black text-slate-900 tracking-tight">Welcome Back</h2>
-                    <p className="text-slate-500 mt-2 font-medium italic">Your personalized health journey continues here</p>
+                    <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">Welcome Back</h2>
+                    <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium italic">Your personalized health journey continues here</p>
                     {error && (
                         <motion.div
                             initial={{ scale: 0.9, opacity: 0 }}
