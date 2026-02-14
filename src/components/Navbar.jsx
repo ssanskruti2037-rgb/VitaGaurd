@@ -106,8 +106,8 @@ const Navbar = () => {
                                     <LayoutDashboard size={20} />
                                     <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none uppercase tracking-widest">Dashboard</span>
                                 </Link>
-                                <Link to="/profile" className="flex items-center gap-3 bg-white dark:bg-slate-800 px-4 py-2 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hover:border-primary-200 transition-all text-slate-700 dark:text-slate-200 font-bold text-sm">
-                                    <div className="bg-primary-50 dark:bg-primary-900/30 p-1 rounded-lg">
+                                <Link to="/profile" className="flex items-center gap-3 bg-white dark:bg-dark-card px-4 py-2 rounded-2xl shadow-sm border border-slate-100 dark:border-dark-border hover:border-primary-200 transition-all text-slate-700 dark:text-slate-200 font-bold text-sm">
+                                    <div className="bg-primary-50 dark:bg-primary-900/10 p-1 rounded-lg">
                                         <User size={16} className="text-primary-600 dark:text-primary-400" />
                                     </div>
                                     Profile
@@ -191,8 +191,8 @@ const Navbar = () => {
                                 </>
                             ) : (
                                 <div className="grid grid-cols-2 gap-4">
-                                    <Link to="/login" className="flex items-center justify-center p-4 bg-slate-50 rounded-2xl text-slate-600 font-bold" onClick={() => setIsOpen(false)}>Login</Link>
-                                    <Link to="/signup" className="flex items-center justify-center p-4 bg-primary-600 rounded-2xl text-white font-bold" onClick={() => setIsOpen(false)}>Sign Up</Link>
+                                    <Link to="/login" className="btn-secondary py-4 text-center" onClick={() => setIsOpen(false)}>Login</Link>
+                                    <Link to="/signup" className="btn-primary py-4 text-center" onClick={() => setIsOpen(false)}>Sign Up</Link>
                                 </div>
                             )}
                         </div>

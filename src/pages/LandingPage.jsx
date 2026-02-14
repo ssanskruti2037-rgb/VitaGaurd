@@ -145,13 +145,13 @@ const LandingPage = () => {
                             </motion.p>
 
                             <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start">
-                                <Link to={currentUser ? "/dashboard" : "/signup"} className="btn-premium group text-lg px-10 py-5 text-center">
+                                <Link to={currentUser ? "/dashboard" : "/signup"} className="btn-premium group text-lg px-10 py-5 text-center shadow-xl shadow-primary-500/20">
                                     {currentUser ? "Go to Dashboard" : "Get Started Free"}
                                     <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
                                 </Link>
                                 <button
                                     onClick={() => document.getElementById('features').scrollIntoView({ behavior: 'smooth' })}
-                                    className="flex items-center justify-center px-10 py-5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold hover:bg-slate-50 transition-all text-lg"
+                                    className="btn-secondary group text-lg px-10 py-5 text-center"
                                 >
                                     Explore Features
                                 </button>
@@ -395,7 +395,7 @@ const LandingPage = () => {
                             <p className="text-xl text-slate-400 mb-12 max-w-2xl mx-auto font-medium">
                                 Join our growing community of proactive individuals who trust VitaGuard for their daily health insights.
                             </p>
-                            <Link to={currentUser ? "/dashboard" : "/signup"} className="btn-premium px-12 py-6 text-xl bg-white text-slate-900 hover:bg-slate-50 border-none shadow-white/10">
+                            <Link to={currentUser ? "/dashboard" : "/signup"} className="btn-premium px-12 py-6 text-xl bg-white dark:bg-primary-600 text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-primary-700 border-none shadow-white/10 dark:shadow-primary-900/40">
                                 {currentUser ? "Go to Dashboard" : "Get Started Now — It's Free"}
                             </Link>
                         </div>

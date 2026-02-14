@@ -55,7 +55,11 @@ const ResultsPage = () => {
         const bmi = weight > 0 ? weight / (heightM * heightM) : 22;
 
         // ========== DETERMINISTIC RISK SCORE ==========
-        let riskScore = 5;
+        let riskScore = 0;
+        if (symptoms.includes('None of the above') || symptoms.length === 0) {
+            riskScore = 0;
+        }
+
         const symptomWeights = {
             'Chest Pain': 6, 'Shortness of Breath': 5, 'Fatigue': 3,
             'Dizziness': 4, 'Persistent Cough': 3, 'Nausea': 3,
@@ -83,9 +87,9 @@ const ResultsPage = () => {
         if (age > 50) riskScore += 4; else if (age > 40) riskScore += 2; else if (age > 30) riskScore += 1;
         if (bmi > 30) riskScore += 4; else if (bmi > 25) riskScore += 2; else if (bmi < 18.5) riskScore += 2;
 
-        riskScore = Math.min(75, Math.max(5, riskScore));
+        riskScore = Math.min(95, Math.max(0, riskScore));
 
-        const getRiskLevel = (s) => s < 15 ? "Low" : s < 30 ? "Moderate" : "High";
+        const getRiskLevel = (s) => s < 16 ? "Low" : s <= 35 ? "Moderate" : "High";
         const riskLevel = getRiskLevel(riskScore);
 
         // ========== RECOMMENDATIONS ==========

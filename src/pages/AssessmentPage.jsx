@@ -250,10 +250,21 @@ const AssessmentPage = () => {
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
-                                    {['Chest Pain', 'Shortness of Breath', 'Fatigue', 'Dizziness', 'Persistent Cough', 'Nausea', 'Frequent Urination', 'Headache'].map((s) => (
+                                    {['Chest Pain', 'Shortness of Breath', 'Fatigue', 'Dizziness', 'Persistent Cough', 'Nausea', 'Frequent Urination', 'Headache', 'None of the above'].map((s) => (
                                         <button
                                             key={s}
-                                            onClick={() => toggleSymptom(s)}
+                                            onClick={() => {
+                                                if (s === 'None of the above') {
+                                                    setFormData({ ...formData, symptoms: ['None of the above'] });
+                                                } else {
+                                                    const newSymptoms = formData.symptoms.filter(sym => sym !== 'None of the above');
+                                                    if (newSymptoms.includes(s)) {
+                                                        setFormData({ ...formData, symptoms: newSymptoms.filter(sym => sym !== s) });
+                                                    } else {
+                                                        setFormData({ ...formData, symptoms: [...newSymptoms, s] });
+                                                    }
+                                                }
+                                            }}
                                             className={`p-4 rounded-2xl text-left border-2 transition-all ${formData.symptoms.includes(s) ? 'border-primary-600 bg-primary-50 text-primary-900' : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-slate-300'}`}
                                         >
                                             <div className="flex justify-between items-center">
@@ -266,7 +277,13 @@ const AssessmentPage = () => {
 
                                 <div className="flex gap-4 pt-6">
                                     <button onClick={handleBack} className="flex-1 btn-secondary py-4">Back</button>
-                                    <button onClick={handleNext} className="flex-[2] btn-primary py-4">Continue to Lifestyle</button>
+                                    <button
+                                        onClick={handleNext}
+                                        disabled={formData.symptoms.length === 0}
+                                        className="flex-[2] btn-primary py-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Continue to Lifestyle
+                                    </button>
                                 </div>
                             </motion.div>
                         )}

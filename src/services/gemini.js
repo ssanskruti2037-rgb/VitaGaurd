@@ -72,36 +72,31 @@ function buildPrompt(formData) {
     }
 
     return `You are a clinical health AI assistant for a preventive healthcare platform called VitaGuard. Analyze the following patient data and provide a structured, evidence-based health risk assessment.
-
-PATIENT DATA:
-- Name: ${formData.name || 'Anonymous'}
-- Age: ${formData.age || 'Not provided'}
-- Gender: ${formData.gender || 'Not provided'}
-- Height: ${formData.height ? formData.height + ' cm' : 'Not provided'}
-- Weight: ${formData.weight ? formData.weight + ' kg' : 'Not provided'}
-- BMI: ${bmiInfo}
-- Reported Symptoms: ${symptoms}
-- Sleep Duration: ${sleepMap[formData.sleep] || 'Not provided'}
-- Exercise Frequency: ${exerciseMap[formData.exercise] || 'Not provided'}
-- Smoking Status: ${smokingMap[formData.smoking] || 'Not provided'}
-- Alcohol Consumption: ${alcoholMap[formData.alcohol] || 'Not provided'}
-
-INSTRUCTIONS:
-1. Analyze the patient's symptoms and lifestyle data holistically. Use clinical reasoning.
-2. Generate a risk score between 5-75 based ENTIRELY on the patient's actual data. Consider:
-   - Number and severity of symptoms reported
-   - Lifestyle risk factors (smoking, alcohol, sleep, exercise)
-   - Age-related risk increases
-   - BMI-related health risks
-   - Co-occurrence patterns (e.g., chest pain + shortness of breath = higher cardiovascular risk)
-3. Determine the risk level: "Low" (score < 15), "Moderate" (15-30), "High" (> 30).
-4. Provide exactly 4 specific, actionable medical recommendations based on their EXACT symptoms and lifestyle. Be specific — reference their actual conditions.
-5. Provide exactly 4 practical daily health tips personalized to their profile, age, and lifestyle.
-6. Calculate sub-category risk scores (0-100) for Cardiovascular, Respiratory, and Metabolic health based on:
-   - Cardiovascular: chest pain, dizziness, exercise habits, smoking, BMI
-   - Respiratory: shortness of breath, persistent cough, smoking status
-   - Metabolic: BMI, exercise frequency, frequent urination, fatigue, diet indicators
-7. Write a personalized 2-3 sentence clinical summary that references their specific data.
+    
+    PATIENT DATA:
+    - Name: ${formData.name || 'Anonymous'}
+    - Age: ${formData.age || 'Not provided'}
+    - BMI: ${bmiInfo}
+    - Reported Symptoms: ${symptoms}
+    - Sleep Duration: ${sleepMap[formData.sleep] || 'Not provided'}
+    - Exercise Frequency: ${exerciseMap[formData.exercise] || 'Not provided'}
+    - Smoking Status: ${smokingMap[formData.smoking] || 'Not provided'}
+    - Alcohol Consumption: ${alcoholMap[formData.alcohol] || 'Not provided'}
+    
+    STRICT SCORING CRITERIA:
+    1. ZERO SYMPTOMS + GOOD HABITS: If the user reports "None" for symptoms AND has good sleep (7-9h)/exercise (Regular/Daily) AND is a non-smoker, the riskScore MUST be below 15 (Low Risk).
+    2. RISK SCORING (5-95):
+       - 5-15 (Low): Healthy baseline, no major symptoms, proactive habits.
+       - 16-35 (Moderate): Minor lifestyle risks (poor sleep/no exercise) or 1-2 mild symptoms (Fatigue/Headache).
+       - 36+ (High): Significant symptoms (Chest Pain, Shortness of Breath) or multiple chronic lifestyle risks.
+    3. CLINICAL REASONING: Be objective. Do not default to high risk just for "safety"—be accurate to the data provided.
+    
+    INSTRUCTIONS:
+    - Generate a riskScore (5-95) and riskLevel (Low < 16, Moderate 16-35, High > 35).
+    - Provide 4 clinical recommendations based ONLY on their reported data.
+    - Provide 4 daily tips personalized to their age and lifestyle.
+    - Calculate sub-category risk scores (0-100) for Cardiovascular, Respiratory, and Metabolic health.
+    - Write a 2-3 sentence summary that references their EXACT metrics.
 
 IMPORTANT: Respond ONLY with valid JSON in the following exact format. No markdown, no code fences, no extra text:
 {
@@ -210,9 +205,14 @@ function generateFallbackAnalysis(formData) {
     const bmi = weight > 0 ? weight / (heightM * heightM) : 22; // Default healthy BMI
 
     // ========== CALCULATE DETERMINISTIC RISK SCORE ==========
-    let riskScore = 5; // Healthy baseline
+    let riskScore = 0; // Absolute healthy baseline
 
-    // Symptom-based scoring (each symptom adds points based on severity)
+    // If perfectly healthy with no symptoms, keep it at 0
+    if (symptoms.includes('None of the above') || symptoms.length === 0) {
+        riskScore = 0;
+    }
+
+    // Symptom-based scoring
     const symptomWeights = {
         'Chest Pain': 6,
         'Shortness of Breath': 5,
@@ -256,13 +256,13 @@ function generateFallbackAnalysis(formData) {
     else if (bmi > 25) riskScore += 2;   // Overweight
     else if (bmi < 18.5) riskScore += 2; // Underweight
 
-    // Clamp to valid range
-    riskScore = Math.min(75, Math.max(5, riskScore));
+    // Clamp to valid range (0-95)
+    riskScore = Math.min(95, Math.max(0, riskScore));
 
     // ========== DETERMINE RISK LEVEL ==========
     const getRiskLevel = (score) => {
-        if (score < 15) return "Low";
-        if (score < 30) return "Moderate";
+        if (score < 16) return "Low";
+        if (score <= 35) return "Moderate";
         return "High";
     };
 
