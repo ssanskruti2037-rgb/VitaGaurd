@@ -119,20 +119,23 @@ const HealthChatBot = ({ reportData }) => {
     return (
         <>
             <motion.div
-                className="fixed bottom-12 right-12 z-50"
-                initial={{ scale: 0 }}
+                className="fixed bottom-4 right-4 z-50"
+                initial={{ scale: 0, shadow: "0 0 0 rgba(0,0,0,0)" }}
                 animate={{ scale: 1 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
             >
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="flex items-center gap-3 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl hover:bg-black transition-all active:scale-95 group border border-slate-700"
+                    className="flex items-center justify-center h-12 w-12 bg-slate-900 text-white rounded-full shadow-2xl hover:bg-black transition-all group border-2 border-primary-500/20"
+                    title="Live AI Health Assistant"
                 >
-                    <div className="bg-primary-500 p-2 rounded-xl group-hover:rotate-12 transition-transform">
+                    <div className="relative">
                         <Bot size={24} />
-                    </div>
-                    <div className="flex flex-col items-start">
-                        <span className="font-bold text-sm leading-none">Health AI</span>
-                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Chat Support</span>
+                        <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-health-emerald opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-health-emerald"></span>
+                        </span>
                     </div>
                 </button>
             </motion.div>
@@ -140,10 +143,10 @@ const HealthChatBot = ({ reportData }) => {
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: 50, scale: 0.95 }}
+                        initial={{ opacity: 0, y: 50, scale: 0.9, originY: 1, originX: 1 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 50, scale: 0.95 }}
-                        className="fixed bottom-12 right-12 w-[90vw] md:w-[480px] h-[680px] bg-white rounded-[2.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.5)] z-[60] flex flex-col overflow-hidden border border-slate-200"
+                        exit={{ opacity: 0, y: 50, scale: 0.9 }}
+                        className="fixed bottom-24 right-4 w-[95vw] md:w-[360px] h-[550px] max-h-[85vh] bg-white rounded-[2rem] shadow-[0_30px_90px_-20px_rgba(0,0,0,0.4)] z-[60] flex flex-col overflow-hidden border border-slate-200"
                     >
                         <div className="bg-slate-900 p-8 text-white relative">
                             <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
@@ -177,8 +180,8 @@ const HealthChatBot = ({ reportData }) => {
                                     className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                                 >
                                     <div className={`p-5 rounded-3xl text-sm leading-relaxed ${msg.role === 'assistant'
-                                            ? 'bg-white text-slate-800 shadow-sm border border-slate-100 rounded-tl-none font-medium max-w-[90%]'
-                                            : 'bg-primary-600 text-white shadow-xl rounded-tr-none font-bold max-w-[85%]'
+                                        ? 'bg-white text-slate-800 shadow-sm border border-slate-100 rounded-tl-none font-medium max-w-[90%]'
+                                        : 'bg-primary-600 text-white shadow-xl rounded-tr-none font-bold max-w-[85%]'
                                         }`}>
                                         {msg.content}
                                     </div>
