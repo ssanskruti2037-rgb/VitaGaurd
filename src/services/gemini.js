@@ -143,7 +143,8 @@ export async function analyzeHealthWithGemini(formData) {
     }
 
     try {
-        const model = client.getGenerativeModel({ model: 'gemini-2.0-flash' });
+        // Use the standard stable Gemini Pro model
+        const model = client.getGenerativeModel({ model: 'gemini-pro' });
         const prompt = buildPrompt(formData);
 
         const result = await model.generateContent(prompt);

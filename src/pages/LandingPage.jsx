@@ -134,13 +134,7 @@ const LandingPage = () => {
                             variants={containerVariants}
                             className="text-center lg:text-left"
                         >
-                            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 py-2 px-5 rounded-full bg-primary-50 border border-primary-100 text-primary-600 font-bold text-xs uppercase tracking-widest mb-8 shadow-sm">
-                                <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
-                                </span>
-                                AI-Powered Preventive Care
-                            </motion.div>
+
 
                             <motion.h1 variants={itemVariants} className="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[1.1] mb-8 tracking-tight">
                                 Health Risk <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-health-cyber">Detection</span> Reimagined.
