@@ -30,8 +30,13 @@ function getClient() {
  * No random or mock data is included — everything comes from the user's input.
  */
 function buildPrompt(formData) {
-    const symptoms = formData.symptoms?.length > 0
-        ? formData.symptoms.join(', ')
+    const symptomsList = [...(formData.symptoms || [])];
+    if (formData.otherSymptoms?.trim()) {
+        symptomsList.push(formData.otherSymptoms.trim());
+    }
+
+    const symptoms = symptomsList.length > 0
+        ? symptomsList.join(', ')
         : 'None reported';
 
     const sleepMap = {
@@ -96,9 +101,14 @@ function buildPrompt(formData) {
     - Provide 4 clinical recommendations based ONLY on their reported data.
     - Provide 4 daily tips personalized to their age and lifestyle.
     - Calculate sub-category risk scores (0-100) for Cardiovascular, Respiratory, and Metabolic health.
-    - Write a 2-3 sentence summary that references their EXACT metrics.
-
-IMPORTANT: Respond ONLY with valid JSON in the following exact format. No markdown, no code fences, no extra text:
+    - Write a 2-3 sentence summary that references their EXACT metrics and interpreted custom symptoms.
+    
+    SPECIAL CRITERIA FOR CUSTOM SYMPTOMS:
+    - If the patient provides custom text in 'Reported Symptoms', prioritize its interpretation. 
+    - For example, 'fever' should trigger respiratory/metabolic concern. 'stress' should trigger lifestyle tips. 
+    - Reference their specific typed words in the recommendations.
+    
+    IMPORTANT: Respond ONLY with valid JSON in the following exact format. No markdown, no code fences, no extra text:
 {
     "riskScore": <number 5-75>,
     "riskLevel": "<Low|Moderate|High>",
@@ -119,8 +129,20 @@ IMPORTANT: Respond ONLY with valid JSON in the following exact format. No markdo
         { "category": "Cardiovascular", "risk": "<Low|Moderate|Elevated>", "score": <number 0-100> },
         { "category": "Respiratory", "risk": "<Low|Moderate|Elevated>", "score": <number 0-100> },
         { "category": "Metabolic", "risk": "<Low|Moderate|Elevated>", "score": <number 0-100> }
+    ],
+    "dietOptions": [
+        "<personalized diet recommendation 1>",
+        "<personalized diet recommendation 2>",
+        "<personalized diet recommendation 3>",
+        "<personalized diet recommendation 4>"
     ]
-}`;
+}
+
+QUALITY GUIDELINES (STRICT):
+1. NO REPETITION: Each recommendation and tip must be unique. Do not repeat the same advice in different words.
+2. CLINICAL DEPTH: Provide logical, evidence-based answers. Use specific nutrients (e.g., 'Magnesium for muscle cramps') rather than generic 'Eat healthy'.
+3. DIET FOCUS: Tailor diet options to their symptoms (e.g., if acid reflux is mentioned, avoid spicy foods).
+4. CONCISE & LOGICAL: Stick to the question. Do not provide fluff.`;
 }
 
 /**
@@ -167,7 +189,8 @@ export async function analyzeHealthWithGemini(formData) {
                 summary: parsed.summary,
                 recommendations: parsed.recommendations.slice(0, 4),
                 tips: parsed.tips?.slice(0, 4) || [],
-                details: parsed.details.slice(0, 3)
+                details: parsed.details.slice(0, 3),
+                dietOptions: parsed.dietOptions?.slice(0, 4) || []
             }
         };
     } catch (error) {
@@ -206,11 +229,15 @@ function generateFallbackAnalysis(formData) {
 
     // ========== CALCULATE DETERMINISTIC RISK SCORE ==========
     let riskScore = 0; // Absolute healthy baseline
+    const hasOther = formData.otherSymptoms?.trim().length > 0;
 
     // If perfectly healthy with no symptoms, keep it at 0
-    if (symptoms.includes('None of the above') || symptoms.length === 0) {
+    if ((symptoms.includes('None of the above') || symptoms.length === 0) && !hasOther) {
         riskScore = 0;
     }
+
+    // Base score bump for custom symptoms
+    if (hasOther) riskScore += 5;
 
     // Symptom-based scoring
     const symptomWeights = {
@@ -310,6 +337,23 @@ function generateFallbackAnalysis(formData) {
         recommendations.push(`Your BMI of ${bmi.toFixed(1)} indicates obesity. A structured nutrition plan with 500 kcal/day deficit is recommended.`);
     }
 
+    // Keyword scanning for custom 'Other' symptoms (Fallback)
+    if (hasOther) {
+        const otherLower = formData.otherSymptoms.toLowerCase();
+        if (otherLower.includes('pain') || otherLower.includes('ache')) {
+            recommendations.push(`Regarding your "${formData.otherSymptoms}": Persistent pain should be evaluated for underlying inflammation.`);
+        }
+        if (otherLower.includes('fever') || otherLower.includes('cold') || otherLower.includes('cough')) {
+            recommendations.push(`For your respiratory/flu concern: Monitor temperature and stay hydrated.`);
+        }
+        if (otherLower.includes('stress') || otherLower.includes('anxiety') || otherLower.includes('mental')) {
+            recommendations.push(`Note on your stress levels: We recommend exploring mindfulness or speaking with a counselor.`);
+        }
+        if (recommendations.length < 4) {
+            recommendations.push(`Specific Note: Your report of "${formData.otherSymptoms}" has been flagged for your review.`);
+        }
+    }
+
     // Healthy profile fallback
     if (recommendations.length === 0) {
         recommendations.push("Maintain your current balanced routine — your baseline metrics are within healthy ranges.");
@@ -341,16 +385,36 @@ function generateFallbackAnalysis(formData) {
 
     tips.push("Eat a variety of colorful vegetables daily — aim for at least 5 different colors per week for micronutrient diversity.");
 
+    // ========== GENERATE DIET OPTIONS (Fallback) ==========
+    const dietOptions = [];
+    if (symptoms.includes('Fatigue') || (hasOther && formData.otherSymptoms.toLowerCase().includes('energy'))) {
+        dietOptions.push("Complex carbohydrates (oats, quinoa) for sustained energy release throughout the day.");
+        dietOptions.push("Iron-rich foods (spinach, lentils) to support healthy oxygen transport in the blood.");
+    }
+    if (symptoms.includes('Frequent Urination') || (hasOther && formData.otherSymptoms.toLowerCase().includes('sugar'))) {
+        dietOptions.push("Low glycemic index foods to maintain stable blood sugar levels.");
+        dietOptions.push("High-fiber vegetables (broccoli, leafy greens) to improve metabolic processing.");
+    }
+    if (symptoms.includes('Headache') || symptoms.includes('Dizziness')) {
+        dietOptions.push("Magnesium-rich foods (almonds, pumpkin seeds) which may help reduce headache frequency.");
+        dietOptions.push("Electrolyte-balanced hydration (coconut water) to maintain proper neural function.");
+    }
+    if (dietOptions.length < 3) {
+        dietOptions.push("Increase intake of Omega-3 fatty acids (walnuts, chia seeds) to support systemic anti-inflammation.");
+        dietOptions.push("Prioritize high-quality protein (eggs, legumes) for tissue repair and immune support.");
+    }
+
     // ========== GENERATE SUMMARY ==========
     let summary = '';
+    const totalSymptomCount = symptoms.length + (hasOther ? 1 : 0);
     if (riskLevel === "High") {
-        summary = `Based on your ${symptoms.length} reported symptom${symptoms.length !== 1 ? 's' : ''} and lifestyle profile, your overall health risk is categorized as High (${riskScore}%). `;
+        summary = `Based on your ${totalSymptomCount} reported symptom${totalSymptomCount !== 1 ? 's' : ''} and lifestyle profile, your overall health risk is categorized as High (${riskScore}%). `;
         summary += "We strongly recommend scheduling a consultation with a healthcare professional to discuss diagnostic testing and a personalized care plan.";
     } else if (riskLevel === "Moderate") {
-        summary = `Your health profile shows ${symptoms.length} symptom${symptoms.length !== 1 ? 's' : ''} that, combined with your lifestyle factors, place you in the Moderate risk category (${riskScore}%). `;
+        summary = `Your health profile shows ${totalSymptomCount} symptom${totalSymptomCount !== 1 ? 's' : ''} that, combined with your lifestyle factors, place you in the Moderate risk category (${riskScore}%). `;
         summary += "While not immediately critical, proactive lifestyle changes and symptom monitoring can significantly reduce your long-term risk.";
     } else {
-        summary = `With ${symptoms.length === 0 ? 'no reported symptoms' : symptoms.length + ' minor symptom' + (symptoms.length !== 1 ? 's' : '')} and a generally healthy lifestyle, your risk profile is Low (${riskScore}%). `;
+        summary = `With ${totalSymptomCount === 0 ? 'no reported symptoms' : totalSymptomCount + ' symptom' + (totalSymptomCount !== 1 ? 's' : '')} and a generally healthy lifestyle, your risk profile is Low (${riskScore}%). `;
         summary += "Continue maintaining your current habits and stay consistent with regular preventive check-ups.";
     }
 
@@ -406,7 +470,8 @@ function generateFallbackAnalysis(formData) {
             summary,
             recommendations: recommendations.slice(0, 4),
             tips: tips.slice(0, 4),
-            details
+            details,
+            dietOptions: dietOptions.slice(0, 4)
         }
     };
 }

@@ -101,6 +101,12 @@ const MedicalReportTemplate = React.forwardRef(({ result, formData }, ref) => {
                     ) : (
                         <p className="text-slate-400 italic">No specific symptoms reported.</p>
                     )}
+                    {formData?.otherSymptoms?.trim() && (
+                        <div className="w-full mt-4 p-4 bg-primary-50 rounded-xl border border-primary-100">
+                            <p className="text-[10px] font-black uppercase text-primary-600 mb-1 tracking-widest">User Described Symptoms:</p>
+                            <p className="text-sm text-slate-700 italic font-medium">"{formData.otherSymptoms}"</p>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -162,6 +168,23 @@ const MedicalReportTemplate = React.forwardRef(({ result, formData }, ref) => {
                     </ul>
                 </div>
             </div>
+
+            {/* 5. Recommended Dietary Patterns */}
+            {result.dietOptions && result.dietOptions.length > 0 && (
+                <div className="mb-8 p-6 bg-slate-50 border border-slate-200 rounded-3xl">
+                    <h4 className="text-sm font-black text-slate-700 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <span className="text-lg">🥗</span> Recommended Dietary Patterns
+                    </h4>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                        {result.dietOptions.map((diet, i) => (
+                            <div key={i} className="flex items-start gap-2 text-sm text-slate-600 font-medium">
+                                <span className="text-primary-500 font-black mt-0.5">•</span>
+                                <span>{diet}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* 7. Lifestyle & Preventive */}
             <div className="p-6 border-2 border-slate-50 rounded-3xl mb-8">

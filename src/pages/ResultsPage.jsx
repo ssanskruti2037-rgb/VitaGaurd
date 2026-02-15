@@ -69,10 +69,17 @@ const ResultsPage = () => {
     // For synchronous rendering, we need the fallback to work inline
     const getResultSync = () => {
         const aiResult = getResult();
-        if (aiResult) return aiResult;
+        const localFallback = generateLocalAnalysis();
 
-        // Inline deterministic fallback (mirrors gemini.js fallback logic)
-        return generateLocalAnalysis();
+        if (aiResult) {
+            // Ensure dietOptions exist even if using an older AI result
+            return {
+                ...aiResult,
+                dietOptions: aiResult.dietOptions || localFallback.dietOptions
+            };
+        }
+
+        return localFallback;
     };
 
     const generateLocalAnalysis = () => {
@@ -85,9 +92,13 @@ const ResultsPage = () => {
 
         // ========== DETERMINISTIC RISK SCORE ==========
         let riskScore = 0;
-        if (symptoms.includes('None of the above') || symptoms.length === 0) {
+        const hasOther = formData.otherSymptoms?.trim().length > 0;
+
+        if ((symptoms.includes('None of the above') || symptoms.length === 0) && !hasOther) {
             riskScore = 0;
         }
+
+        if (hasOther) riskScore += 5;
 
         const symptomWeights = {
             'Chest Pain': 6, 'Shortness of Breath': 5, 'Fatigue': 3,
@@ -134,6 +145,24 @@ const ResultsPage = () => {
         if (formData.sleep === 'less_5') recommendations.push("Increase sleep to 7-8 hours to lower cortisol and cardiovascular risk.");
         if (formData.exercise === 'never') recommendations.push("Begin with 20 min brisk walking daily — reduces all-cause mortality by 20%.");
         if (formData.smoking === 'regular') recommendations.push("Initiate a smoking cessation plan to reduce respiratory and cardiovascular risk.");
+
+        // Simple keyword scanning for custom 'Other' symptoms
+        if (hasOther) {
+            const otherLower = formData.otherSymptoms.toLowerCase();
+            if (otherLower.includes('pain') || otherLower.includes('ache')) {
+                recommendations.push(`Regarding your "${formData.otherSymptoms}": Any persistent pain should be examined by a physician to rule out inflammation.`);
+            }
+            if (otherLower.includes('fever') || otherLower.includes('cold') || otherLower.includes('cough')) {
+                recommendations.push("For your reported respiratory/flu symptoms: Rest, hydrate, and monitor your temperature.");
+            }
+            if (otherLower.includes('stress') || otherLower.includes('anxiety') || otherLower.includes('mental')) {
+                recommendations.push("We noticed you mentioned stress-related symptoms. Consider professional mental health consultation.");
+            }
+            if (recommendations.length < 3) {
+                recommendations.push(`Our system logged your specific note: "${formData.otherSymptoms}". Discuss this specifically with your doctor.`);
+            }
+        }
+
         if (recommendations.length === 0) {
             recommendations.push("Maintain your balanced routine — your metrics are within healthy ranges.");
             recommendations.push("Schedule annual preventive health screening for your age group.");
@@ -153,6 +182,25 @@ const ResultsPage = () => {
             ? "Prioritize calcium and Vitamin D for bone density support."
             : "Build stress-management habits — try 5 min daily meditation.");
         tips.push("Eat colorful vegetables daily — aim for 5+ different colors per week.");
+
+        // ========== DIET OPTIONS ==========
+        const dietOptions = [];
+        if (symptoms.includes('Fatigue') || (hasOther && formData.otherSymptoms?.toLowerCase().includes('energy'))) {
+            dietOptions.push("Complex carbohydrates (oats, quinoa) for sustained energy.");
+            dietOptions.push("Iron-rich foods (spinach, lentils) for healthy oxygen transport.");
+        }
+        if (symptoms.includes('Frequent Urination') || (hasOther && formData.otherSymptoms?.toLowerCase().includes('sugar'))) {
+            dietOptions.push("Low glycemic index foods (whole grains) to stabilize blood sugar.");
+            dietOptions.push("High-fiber vegetables to improve metabolic processing.");
+        }
+        if (symptoms.includes('Headache') || symptoms.includes('Dizziness')) {
+            dietOptions.push("Magnesium-rich foods (almonds, pumpkin seeds) to reduce headache frequency.");
+            dietOptions.push("Electrolyte-balanced hydration to maintain proper neural function.");
+        }
+        if (dietOptions.length < 3) {
+            dietOptions.push("Omega-3 fatty acids (walnuts, chia seeds) for systemic anti-inflammation.");
+            dietOptions.push("High-quality protein (legumes, lean sources) for tissue repair.");
+        }
 
         // ========== SUMMARY ==========
         let summary = `Based on your ${symptoms.length} reported symptom${symptoms.length !== 1 ? 's' : ''} and lifestyle profile, your risk is ${riskLevel} (${riskScore}%). `;
@@ -196,6 +244,7 @@ const ResultsPage = () => {
                 { category: "Respiratory", risk: getRiskLabel(respScore), score: Math.min(100, respScore) },
                 { category: "Metabolic", risk: getRiskLabel(metaScore), score: Math.min(100, metaScore) }
             ],
+            dietOptions: dietOptions.slice(0, 4),
             source: 'fallback'
         };
     };
@@ -359,15 +408,16 @@ const ResultsPage = () => {
                         </div>
                     </motion.div>
 
-                    {/* Recommendations */}
+                    {/* Recommendations & Diet */}
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="lg:col-span-7 space-y-6"
+                        className="lg:col-span-7 space-y-8"
                     >
-                        <div className="bg-white dark:bg-dark-card rounded-[2rem] p-8 shadow-lg border border-slate-100 dark:border-dark-border h-full">
-                            <h3 className="text-2xl font-bold text-slate-800 mb-8 flex items-center gap-3">
+                        {/* Precaution Card */}
+                        <div className="bg-white dark:bg-dark-card rounded-[2rem] p-8 shadow-lg border border-slate-100 dark:border-dark-border">
+                            <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-8 flex items-center gap-3">
                                 <span className="text-3xl">🛡️</span>
                                 Recommended Precautions
                             </h3>
@@ -383,11 +433,36 @@ const ResultsPage = () => {
                                         <div className="bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-full p-1.5 mt-1">
                                             <CheckCircle2 size={16} />
                                         </div>
-                                        <p className="text-slate-700 font-medium leading-relaxed">{rec}</p>
+                                        <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">{rec}</p>
                                     </motion.li>
                                 ))}
                             </ul>
                         </div>
+
+                        {/* Diet Plan Card */}
+                        {result.dietOptions && result.dietOptions.length > 0 && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.5 }}
+                                className="bg-white dark:bg-dark-card rounded-[2rem] p-8 shadow-lg border-2 border-primary-100 dark:border-primary-900/40 relative overflow-hidden"
+                            >
+                                <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-primary-100/30 dark:bg-primary-900/10 blur-[60px] rounded-full pointer-events-none"></div>
+
+                                <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-8 flex items-center gap-3 relative z-10">
+                                    <span className="text-3xl">🥗</span>
+                                    Personalized Diet Plan
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+                                    {result.dietOptions.map((diet, idx) => (
+                                        <div key={idx} className="bg-slate-50 dark:bg-dark-bg/40 p-5 rounded-2xl border border-slate-100 dark:border-dark-border flex items-start gap-3">
+                                            <div className="w-2 h-2 rounded-full bg-primary-500 mt-2 shrink-0"></div>
+                                            <p className="text-slate-700 dark:text-slate-300 text-sm font-bold leading-snug">{diet}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )}
                     </motion.div>
 
                     {/* Side Info / CTA */}

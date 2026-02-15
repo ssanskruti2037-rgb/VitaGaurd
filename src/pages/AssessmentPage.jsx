@@ -19,6 +19,7 @@ const AssessmentPage = () => {
         height: '',
         weight: '',
         symptoms: [],
+        otherSymptoms: '',
         sleep: '',
         exercise: '',
         smoking: '',
@@ -245,26 +246,22 @@ const AssessmentPage = () => {
                                 className="space-y-6"
                             >
                                 <div>
-                                    <h2 className="text-2xl font-bold text-slate-800 mb-2">Are you experiencing any of these?</h2>
-                                    <p className="text-slate-500 mb-8">Select all that apply. Be as accurate as possible.</p>
+                                    <h2 className="text-2xl font-bold text-slate-800 mb-2">What Symptoms are you facing?</h2>
+                                    <p className="text-slate-500 mb-8">Select all that apply and describe any others below.</p>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
-                                    {['Chest Pain', 'Shortness of Breath', 'Fatigue', 'Dizziness', 'Persistent Cough', 'Nausea', 'Frequent Urination', 'Headache', 'None of the above'].map((s) => (
+                                    {['Chest Pain', 'Shortness of Breath', 'Fatigue', 'Dizziness', 'Persistent Cough', 'Nausea', 'Frequent Urination', 'Headache'].map((s) => (
                                         <button
                                             key={s}
                                             onClick={() => {
-                                                if (s === 'None of the above') {
-                                                    setFormData({ ...formData, symptoms: ['None of the above'] });
+                                                if (formData.symptoms.includes(s)) {
+                                                    setFormData({ ...formData, symptoms: formData.symptoms.filter(sym => sym !== s) });
                                                 } else {
-                                                    const newSymptoms = formData.symptoms.filter(sym => sym !== 'None of the above');
-                                                    if (newSymptoms.includes(s)) {
-                                                        setFormData({ ...formData, symptoms: newSymptoms.filter(sym => sym !== s) });
-                                                    } else {
-                                                        setFormData({ ...formData, symptoms: [...newSymptoms, s] });
-                                                    }
+                                                    setFormData({ ...formData, symptoms: [...formData.symptoms, s] });
                                                 }
                                             }}
+                                            type="button"
                                             className={`p-4 rounded-2xl text-left border-2 transition-all ${formData.symptoms.includes(s) ? 'border-primary-600 bg-primary-50 text-primary-900' : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-slate-300'}`}
                                         >
                                             <div className="flex justify-between items-center">
@@ -275,11 +272,22 @@ const AssessmentPage = () => {
                                     ))}
                                 </div>
 
+                                <div className="mt-8">
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">Other Symptoms (Describe below)</label>
+                                    <textarea
+                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none resize-none"
+                                        rows="3"
+                                        placeholder="Tell us about any other discomfort or symptoms you're feeling..."
+                                        value={formData.otherSymptoms}
+                                        onChange={(e) => setFormData({ ...formData, otherSymptoms: e.target.value })}
+                                    ></textarea>
+                                </div>
+
                                 <div className="flex gap-4 pt-6">
                                     <button onClick={handleBack} className="flex-1 btn-secondary py-4">Back</button>
                                     <button
                                         onClick={handleNext}
-                                        disabled={formData.symptoms.length === 0}
+                                        disabled={formData.symptoms.length === 0 && !formData.otherSymptoms.trim()}
                                         className="flex-[2] btn-primary py-4 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         Continue to Lifestyle

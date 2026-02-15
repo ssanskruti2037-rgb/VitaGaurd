@@ -45,7 +45,7 @@ const HealthChatBot = ({ reportData }) => {
             const model = genAI.getGenerativeModel({
                 model: "gemini-1.5-flash",
                 generationConfig: {
-                    temperature: 0.8,
+                    temperature: 0.5,
                     maxOutputTokens: 500,
                 }
             });
@@ -58,15 +58,15 @@ const HealthChatBot = ({ reportData }) => {
                 - Risk: ${reportData?.riskLevel} (${reportData?.score}%)
                 - Summary: ${reportData?.summary}
                 - Recommendations: ${reportData?.recommendations?.join(', ')}
+                - Diet Options: ${reportData?.dietOptions?.join(', ')}
                 - Category Details: ${reportData?.details?.map(d => `${d.category}:${d.risk}`).join(', ')}
 
-                RULES:
-                1. DYNAMIC ANSWERS: Never repeat exactly what is in the report. Explain the "WHY" behind the results. 🧪
-                2. FOLLOW-UPS: If the user asks a follow-up, use the chat history to provide NEW information. Do not repeat previous answers. 🔄
-                3. PROFESSIONALISM & FORMALITIES: Be helpful, medical-focused, and clear. If the user says "thank you", "thanks", "hello", etc., respond with polite formalities (e.g., "You're very welcome!", "My pleasure!", "Greetings!"). 🙏
-                4. EMOJIS: Use appropriate health and friendly emojis in every response to make the interaction feel modern and supportive (e.g., 🩺, 🥗, 💧, 💪, ✨). 
-                5. NO SYSTEM NOTES: Do not mention API keys, engines, or technical status. 🤫
-                6. DISCLAIMER: Always end with a brief "Consult a professional for medical diagnosis. 🏥"
+                STRICT OPERATIONAL RULES:
+                1. NO REPETITION: Do not repeat facts from the report or previous answers. If they ask a follow-up, pivot to NEW insights.
+                2. STICK TO THE QUESTION: Give real, logical, medical-based answers. If they ask about food, talk about their specific dietary needs.
+                3. CLINICAL DEPTH: Explain the "WHY" behind suggestions using scientific reasoning.
+                4. NO FLUFF: Keep it concise and meaningful.
+                5. DISCLAIMER: Always end with: "Consult a professional for medical diagnosis. 🏥"
             `;
 
             const history = messages.map(m => `${m.role === 'assistant' ? 'AI' : 'User'}: ${m.content}`).join('\n');
